@@ -19,6 +19,21 @@
 import commonConstants from 'assets/constants';
 
 export const AppConstants = {
+
+
+  // -----------------------------------------
+// Gamification placeholder constants
+// (Temporary: will be expanded during feature work)
+// -----------------------------------------
+GAMIFICATION: {
+  XP_PER_LESSON: 20,
+  XP_PER_QUIZ_CORRECT_ANSWER: 5,
+  INITIAL_STREAK_COUNT: 0,
+  BADGES: {
+    FIRST_LESSON: 'first_lesson_completed',
+    SEVEN_DAY_STREAK: '7_day_streak'
+  }
+},
   ...commonConstants,
   DEFAULT_TRANSLATIONS: {
     I18N_LIBRARY_PAGE_TITLE_FRAGMENT_FOR_WEB: 'Library',
