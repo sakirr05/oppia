@@ -24,6 +24,16 @@
             (keyup.enter)="setActiveSection(LEARNER_DASHBOARD_SECTION_I18N_IDS.PROGRESS)" >
           <span [innerHTML]="LEARNER_DASHBOARD_SECTION_I18N_IDS.PROGRESS | translate"></span>
         </h4>
+
+        <!-- CUSTOM PROJECT: Achievements Tab (Desktop Sidebar) -->
+        <h4 class="oppia-learner-dashboard-menu oppia-learner-dashborad-menu-hover" tabindex="0"
+            [ngClass]="{'oppia-learner-dashboard-section-active': activeSection === 'ACHIEVEMENTS'}"
+            (click)="setActiveSection('ACHIEVEMENTS')"
+            (keyup.enter)="setActiveSection('ACHIEVEMENTS')" >
+          <span>Achievements</span>
+        </h4>
+        <!-- END CUSTOM PROJECT -->
+
         <h4 class="oppia-learner-dashboard-menu oppia-learner-dashborad-menu-hover e2e-test-learner-groups-section" tabindex="0"
             [ngClass]="{'oppia-learner-dashboard-section-active': activeSection === LEARNER_DASHBOARD_SECTION_I18N_IDS.LEARNER_GROUPS}"
             *ngIf="LEARNER_GROUP_FEATURE_IS_ENABLED"
@@ -79,6 +89,20 @@
             {{ LEARNER_DASHBOARD_SECTION_I18N_IDS.PROGRESS | translate }}
           </button>
         </li>
+
+        <!-- CUSTOM PROJECT: Achievements Tab (Redesigned Sidebar) -->
+        <li>
+          <button aria-label="Go to achievements tab"
+                  class="align-items-center d-inline-flex rounded oppia-learner-dash-sidebar_btn text-left w-100" tabindex="0"
+                  [ngClass]="{'oppia-learner-dash-sidebar_btn--active': activeSection === 'ACHIEVEMENTS'}"
+                  (click)="setActiveSection('ACHIEVEMENTS')"
+                  (keyup.enter)="setActiveSection('ACHIEVEMENTS')">
+            <span aria-hidden="true" class="fas fa-trophy fa-lg"></span>
+            Achievements
+          </button>
+        </li>
+        <!-- END CUSTOM PROJECT -->
+
       </ol>
     </nav>
     <footer class="oppia-learner-dashboard-buttons" *ngIf="windowIsNarrow && !isShowRedesignedLearnerDashboardActive()" headroom>
@@ -95,6 +119,14 @@
           <img [src]="progressImageUrl" alt="progress image" class="oppia-svg-image">
           <span [innerHTML]="LEARNER_DASHBOARD_SECTION_I18N_IDS.PROGRESS | translate" class="progress-button e2e-test-mobile-progress-section"></span>
         </div>
+
+        <!-- CUSTOM PROJECT: Achievements Button (Mobile Footer) -->
+        <div class="oppia-buttons" (click)="setActiveSection('ACHIEVEMENTS')" [ngClass]="{'oppia-learner-dashboard-section-active-button': activeSection === 'ACHIEVEMENTS', 'oppia-learner-dashboard-section-not-active-button': activeSection !== 'ACHIEVEMENTS'}">
+           <i class="fas fa-trophy" style="font-size: 20px; display: block; margin: 0 auto 4px;"></i>
+           <span class="progress-button">Awards</span>
+        </div>
+        <!-- END CUSTOM PROJECT -->
+
         <div class="oppia-buttons" *ngIf="LEARNER_GROUP_FEATURE_IS_ENABLED" (click)="setActiveSection(LEARNER_DASHBOARD_SECTION_I18N_IDS.LEARNER_GROUPS)" [ngClass]="{'oppia-learner-dashboard-section-active-button': activeSection === LEARNER_DASHBOARD_SECTION_I18N_IDS.LEARNER_GROUPS, 'oppia-learner-dashboard-section-not-active-button': activeSection !== LEARNER_DASHBOARD_SECTION_I18N_IDS.LEARNER_GROUPS}">
           <i class="fa fa-users learner-groups-icon" aria-hidden="true"></i>
           <span [innerHTML]="LEARNER_DASHBOARD_SECTION_I18N_IDS.LEARNER_GROUPS | translate" class="learner-groups-button"></span>
@@ -164,20 +196,114 @@
                                     (setActiveSection)="setActiveSection($event)">
           </oppia-learner-groups-tab>
         </div>
+
+        <!-- CUSTOM PROJECT: Main Dashboard Content (UPGRADED) -->
+        <div *ngIf="activeSection === 'ACHIEVEMENTS'" class="w-100">
+          <div class="oppia-learner-dashboard-main-content-container" style="padding: 20px 0;">
+            <h2 class="oppia-learner-dashboard-title" style="color: #00645C; margin-bottom: 20px;">My Achievements</h2>
+            
+            <!-- DEBUG / SIMULATION PANEL -->
+            <div style="background: #f1f1f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #ccc;">
+              <strong style="display:block; margin-bottom:10px; color:#555;">🛠️ Debug: Simulation Panel</strong>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button (click)="simulateLessonComplete()" class="btn btn-success btn-sm">
+                  ▶ Lesson (+50 pts)
+                </button>
+                <button (click)="simulateQuizAce()" class="btn btn-primary btn-sm">
+                  📝 Ace Quiz (>90%)
+                </button>
+                <button (click)="simulateSpeedRun()" class="btn btn-warning btn-sm" style="color:black;">
+                  ⚡ Speed Run (<3m)
+                </button>
+              </div>
+            </div>
+
+            <!-- Points Card -->
+            <mat-card style="margin-bottom: 30px; padding: 25px; display: flex; align-items: center; background: white;">
+               <div style="background: #E0F2F1; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+                 <i class="fas fa-star" style="font-size: 30px; color: #009688;"></i>
+               </div>
+               <div>
+                 <h3 style="margin: 0; font-weight: bold;">{{ userPoints }} Points</h3>
+                 <p style="margin: 0; color: #666;">
+                   Rank: #{{ leaderboard[1].name === 'Sakir' ? leaderboard[1].rank : leaderboard[0].rank }} on Leaderboard
+                 </p>
+               </div>
+            </mat-card>
+
+            <!-- BADGES GRID -->
+            <h3 style="color: #00645C; margin-bottom: 20px;">My Badges</h3>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 40px;">
+              <!-- Loop through ALL badges -->
+              <mat-card *ngFor="let badge of allBadges" 
+                [style.opacity]="badge.unlocked ? '1' : '0.5'"
+                [style.background]="badge.style === 'modern' && badge.unlocked ? 'linear-gradient(135deg, #fff 0%, #f0f9ff 100%)' : 'white'"
+                [style.border]="badge.style === 'modern' && badge.unlocked ? '2px solid #81D4FA' : 'none'"
+                [style.box-shadow]="badge.style === 'modern' && badge.unlocked ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.12)'"
+                style="width: 160px; text-align: center; padding: 20px; transition: transform 0.2s;">
+                
+                <!-- Badge Icon -->
+                <div style="font-size: 40px; margin-bottom: 10px;">
+                   {{ badge.unlocked ? badge.icon : '🔒' }}
+                </div>
+                
+                <!-- Badge Name -->
+                <strong style="display: block; font-size: 14px; margin-bottom: 4px;">{{ badge.name }}</strong>
+                
+                <!-- Badge Desc -->
+                <small style="color: #777; font-size: 11px; line-height: 1.2; display:block;">
+                  {{ badge.desc }}
+                </small>
+
+                <!-- Modern "New" Label for Set 2 badges -->
+                <div *ngIf="badge.style === 'modern' && badge.unlocked" 
+                     style="margin-top:8px; font-size:10px; background:#4FC3F7; color:white; padding:2px 6px; border-radius:10px; display:inline-block;">
+                  Special
+                </div>
+
+              </mat-card>
+            </div>
+
+            <!-- LEADERBOARD SECTION -->
+            <h3 style="color: #00645C; margin-bottom: 20px;">Leaderboard</h3>
+            <table class="table table-hover" style="background: white; border-radius: 8px;">
+              <thead style="background: #00645C; color: white;">
+                <tr>
+                  <th>Rank</th>
+                  <th>Student</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of leaderboard" [style.background]="user.name === 'Sakir' ? '#E0F2F1' : 'white'">
+                  <td>#{{ user.rank }}</td>
+                  <td>
+                    <strong>{{ user.name }}</strong>
+                    <span *ngIf="user.name === 'Sakir'" class="badge badge-success" style="margin-left: 5px;">YOU</span>
+                  </td>
+                  <td>{{ user.points }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- END CUSTOM PROJECT -->
+
         <div class="w-100" *ngIf="(isShowRedesignedLearnerDashboardActive() && activeSection === LEARNER_DASHBOARD_SECTION_I18N_IDS.PROGRESS) || ((!windowIsNarrow && activeSection === LEARNER_DASHBOARD_SECTION_I18N_IDS.COMMUNITY_LESSONS) || (windowIsNarrow && activeSection === LEARNER_DASHBOARD_SECTION_I18N_IDS.PROGRESS && activeSubsection === LEARNER_DASHBOARD_SUBSECTION_I18N_IDS.LESSONS)) && communityLessonsDataLoaded">
           <oppia-progress-tab [incompleteExplorationsList]="incompleteExplorationsList"
-                                       [incompleteCollectionsList]="incompleteCollectionsList"
-                                       [completedExplorationsList]="completedExplorationsList"
-                                       [completedCollectionsList]="completedCollectionsList"
-                                       [explorationPlaylist]="explorationPlaylist"
-                                       [collectionPlaylist]="collectionPlaylist"
-                                       [subscriptionsList]="subscriptionsList"
-                                       [partiallyLearntTopicsList]="partiallyLearntTopicsList"
-                                       [learntTopicsList]="learntTopicsList"
-                                       [completedToIncompleteCollections]="completedToIncompleteCollections"
-                                       [learnerDashboardRedesignFeatureFlag]="isShowRedesignedLearnerDashboardActive()"
-                                       [currentGoals]="topicsToLearn"
-                                       [subtopicMasteries]="subtopicMasteries">
+                                             [incompleteCollectionsList]="incompleteCollectionsList"
+                                             [completedExplorationsList]="completedExplorationsList"
+                                             [completedCollectionsList]="completedCollectionsList"
+                                             [explorationPlaylist]="explorationPlaylist"
+                                             [collectionPlaylist]="collectionPlaylist"
+                                             [subscriptionsList]="subscriptionsList"
+                                             [partiallyLearntTopicsList]="partiallyLearntTopicsList"
+                                             [learntTopicsList]="learntTopicsList"
+                                             [completedToIncompleteCollections]="completedToIncompleteCollections"
+                                             [learnerDashboardRedesignFeatureFlag]="isShowRedesignedLearnerDashboardActive()"
+                                             [currentGoals]="topicsToLearn"
+                                             [subtopicMasteries]="subtopicMasteries">
           </oppia-progress-tab>
         </div>
       </div>
@@ -188,6 +314,7 @@
     </div>
   </div>
 </div>
+
 
 <style>
   .oppia-profile-alignment {

@@ -140,6 +140,54 @@ export class LearnerDashboardPageComponent implements OnInit, OnDestroy {
     LearnerDashboardPageConstants.LEARNER_DASHBOARD_SUBSECTION_I18N_IDS;
 
   username: string = '';
+
+  // --- GAMIFICATION PROJECT START (UPGRADED) ---
+  
+  // 1. Define User Stats to track progress for badges
+  userStats = {
+    lessonsCompleted: 0,
+    quizScoresOver90: 0,
+    commentsMade: 0,
+    daysActiveThisWeek: 0,
+    currentStreak: 0,
+    feedbackLeft: 0,
+    weeklyStudyDays: 0,
+    topicCategories: 0,
+    fastestLessonMinutes: 999
+  };
+
+  userPoints: number = 1250;
+
+  // 2. Define ALL Badges (Set 1 & Set 2)
+  allBadges: any[] = [
+    // --- EXISTING (UPDATED) ---
+    { id: 'fast_starter', icon: '🚀', name: 'Fast Starter', desc: 'Completed your first lesson with style.', unlocked: true },
+    { id: 'on_fire', icon: '🔥', name: 'On Fire', desc: '7 day streak champion.', unlocked: true },
+
+    // --- SET 1: PERFORMANCE & COMMUNITY (Standard Style) ---
+    { id: 'marathon', icon: '🏃', name: 'Marathon Learner', desc: 'Complete 25 lessons', criteria: { stat: 'lessonsCompleted', target: 25 }, unlocked: false },
+    { id: 'quiz_master', icon: '🧠', name: 'Quiz Master', desc: 'Score >90% in 10 quizzes', criteria: { stat: 'quizScoresOver90', target: 10 }, unlocked: false },
+    { id: 'comm_hero', icon: '🤝', name: 'Community Hero', desc: '5 helpful comments', criteria: { stat: 'commentsMade', target: 5 }, unlocked: false },
+    { id: 'weekly_war', icon: '⚔️', name: 'Weekly Warrior', desc: 'Learn 5 days in a week', criteria: { stat: 'daysActiveThisWeek', target: 5 }, unlocked: false },
+    { id: 'leader_leg', icon: '👑', name: 'Leaderboard Legend', desc: 'Reach Top 3 Rank', criteria: { rank: 3 }, unlocked: false },
+
+    // --- SET 2: MODERN STYLE (Duolingo/GitHub Vibes) ---
+    { id: 'streak_surv', icon: '⚡', name: 'Streak Survivor', desc: '14-day streak', style: 'modern', criteria: { stat: 'currentStreak', target: 14 }, unlocked: false },
+    { id: 'speed_run', icon: '⏱️', name: 'Speed Runner', desc: 'Lesson in <3 mins', style: 'modern', criteria: { stat: 'fastestLessonMinutes', target: 3, operator: '<' }, unlocked: false },
+    { id: 'feed_champ', icon: '💬', name: 'Feedback Champion', desc: '3 constructive comments', style: 'modern', criteria: { stat: 'feedbackLeft', target: 3 }, unlocked: false },
+    { id: 'cons_learn', icon: '📅', name: 'Consistent Learner', desc: '5 days/week for 4 weeks', style: 'modern', criteria: { stat: 'weeklyStudyDays', target: 20 }, unlocked: false },
+    { id: 'mast_expl', icon: '🗺️', name: 'Master Explorer', desc: '5 different topics', style: 'modern', criteria: { stat: 'topicCategories', target: 5 }, unlocked: false }
+  ];
+
+  leaderboard: any[] = [
+    { rank: 1, name: 'Jyotiraditya', points: 1500 },
+    { rank: 2, name: 'Sakir', points: 1250 },
+    { rank: 3, name: 'Alex', points: 1100 },
+    { rank: 4, name: 'Sarah', points: 950 },
+    { rank: 5, name: 'Mike', points: 800 }
+  ];
+  // --- GAMIFICATION PROJECT END ---
+
   PAGES_REGISTERED_WITH_FRONTEND = AppConstants.PAGES_REGISTERED_WITH_FRONTEND;
 
   // These properties below are initialized using Angular lifecycle hooks
@@ -242,6 +290,7 @@ export class LearnerDashboardPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.ngOnInitGamification();
     this.loaderService.showLoadingScreen('Loading');
 
     let userInfoPromise = this.userService.getUserInfoAsync();
@@ -385,6 +434,83 @@ export class LearnerDashboardPageComponent implements OnInit, OnDestroy {
       })
     );
   }
+
+  // --- GAMIFICATION FUNCTIONS START ---
+  ngOnInitGamification(): void {
+    const savedPoints = localStorage.getItem('myProject_points');
+    if (savedPoints) {
+      this.userPoints = parseInt(savedPoints);
+    }
+    // Initialize stats for demo purposes (set values close to badge unlock thresholds)
+    this.userStats.lessonsCompleted = 24; // 1 away from Marathon Learner
+    this.userStats.quizScoresOver90 = 9;  // 1 away from Quiz Master
+  }
+
+  // 3. AUTOMATIC AWARDING LOGIC
+  checkBadges(): void {
+    this.allBadges.forEach(badge => {
+      if (badge.unlocked) return; // Skip if already owned
+
+      let earned = false;
+      if (badge.criteria) {
+        // Check stat-based criteria
+        if (badge.criteria.stat) {
+          const currentVal = this.userStats[badge.criteria.stat as keyof typeof this.userStats];
+          const target = badge.criteria.target;
+          if (badge.criteria.operator === '<') {
+            if (currentVal < target) earned = true;
+          } else {
+            if (currentVal >= target) earned = true;
+          }
+        }
+        // Check rank-based criteria
+        if (badge.criteria.rank) {
+          const myRank = this.leaderboard.find(u => u.name === 'Sakir')?.rank || 99;
+          if (myRank <= badge.criteria.rank) earned = true;
+        }
+      }
+
+      if (earned) {
+        badge.unlocked = true;
+        alert(`🎉 UNLOCKED BADGE: ${badge.name}!\n${badge.desc}`);
+      }
+    });
+  }
+
+  // 4. SIMULATION ACTIONS (Trigger these from buttons)
+  simulateLessonComplete(): void {
+    this.userPoints += 50;
+    this.userStats.lessonsCompleted++; 
+    this.userStats.topicCategories = 5; // Instant unlock for demo
+    localStorage.setItem('myProject_points', this.userPoints.toString());
+    
+    // Simulate Rank Change
+    if (this.userPoints > 1400) {
+      this.leaderboard[1].points = this.userPoints;
+      // Swap logic
+      const temp = this.leaderboard[0];
+      this.leaderboard[0] = this.leaderboard[1];
+      this.leaderboard[0].rank = 1;
+      this.leaderboard[1] = temp;
+      this.leaderboard[1].rank = 2;
+      alert('🏆 You just moved up to Rank #1!');
+    }
+
+    this.checkBadges(); // Run the check!
+  }
+
+  simulateQuizAce(): void {
+    this.userStats.quizScoresOver90++;
+    alert('📝 Quiz Aced! (Score > 90%)');
+    this.checkBadges();
+  }
+
+  simulateSpeedRun(): void {
+    this.userStats.fastestLessonMinutes = 2;
+    alert('⚡ Fast! Lesson finished in 2 mins.');
+    this.checkBadges();
+  }
+  // --- GAMIFICATION FUNCTIONS END ---
 
   ngOnDestroy(): void {
     this.directiveSubscriptions.unsubscribe();
