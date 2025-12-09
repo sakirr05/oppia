@@ -50,6 +50,57 @@ The Oppia code is released under the [Apache v2 license](https://github.com/oppi
 - [Discussion forum](https://github.com/oppia/oppia/discussions)
 - [Announcements mailing list](http://groups.google.com/group/oppia-announce)
 
+
+# Gamification Achievements Module for Oppia
+
+## 📌 Overview
+This project integrates a **Gamification Achievements System** into the Oppia learning platform. It is designed to boost learner engagement by introducing a "Learning Arcade" where users can track progress, earn badges, and view real-time statistics on their dashboard.
+
+The module connects a custom **Angular frontend** (added to the Learner Dashboard) with a **Python backend** that handles data persistence and API endpoints.
+
+## 🚀 Key Features
+- **Learning Arcade Dashboard:** A new tab in the Learner Dashboard displaying user stats.
+- **Achievements & Badges:** Visual representation of milestones unlocked by the user.
+- **Real-Time Points System:** Tracks user activity and updates scores dynamically.
+- **Backend Integration:** Connects to Oppia's datastore to fetch and save user progress securely.
+
+## 🛠️ Tech Stack
+- **Frontend:** Angular (TypeScript, HTML, CSS)
+- **Backend:** Python 3 (Google App Engine / Flask-like architecture)
+- **Database:** Google Cloud Datastore (NDB Models) / SQLite (Local)
+- **DevOps:** Docker, Git
+
+## 📂 Code Structure & Changes
+The following key files were modified or created to implement this system:
+
+### 1. Frontend (Angular)
+- **`core/templates/pages/learner-dashboard-page/learner-dashboard-page.component.html`**
+  - Added the "Learning Arcade" tab UI.
+  - Integrated the `background-banner` and stats display sections.
+- **`core/templates/pages/learner-dashboard-page/learner-dashboard-page.component.ts`**
+  - Updated component logic to fetch gamification data from the backend.
+  - Added methods to handle tab switching and data binding.
+
+### 2. Backend (Python)
+- **`core/feconf.py`**
+  - Updated `ValidModelNames` enum to include `GAMIFICATION` as a valid storage model type.
+- **`main.py`**
+  - Registered the new Gamification API controllers to expose endpoints for the frontend.
+- **`core/platform/models.py`**
+  - Defined the storage schema for user achievements and points.
+- **`core/controllers/gamification.py`** (New)
+  - Implements the logic for calculating points and retrieving badge data.
+
+## ⚙️ Installation & Setup
+
+### Prerequisites
+- Docker (recommended) or Python 3.8+ environment
+- Git
+
+### Running Locally
+1. **Clone the repository:**
+
+
 ## Contributing
 
 - **[Fix learner dashboard goals test to verify Completed Goals and Add Goal sections](https://github.com/oppia/oppia/pull/23652) (Merged Nov 3, 2025)**  
